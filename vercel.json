@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/complete", "destination": "/complete.html" }
+  ]
+}
+
