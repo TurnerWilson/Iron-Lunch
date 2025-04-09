@@ -8,26 +8,51 @@
 <body>
     <h1>Complete Your Iron Lunch</h1>
 
-    <form>
+    <form id="ironLunchForm">
         <label for="customer-number">Type Your Customer Number:</label><br>
-        <input type="text" id="customer-number" name="customer-number" placeholder="e.g. 12345"><br><br>
+        <input type="text" id="customer-number" name="customer-number" placeholder="e.g. 3">
+        <button type="button" onclick="loadSequence()">Load Sequence</button><br><br>
 
-        <label>
-            <input type="checkbox" name="step1">
-            Activity #1
-        </label><br><br>
+        <div id="checkbox-container">
+            <!-- Checkboxes will be injected here -->
+        </div>
 
-        <label>
-            <input type="checkbox" name="step2">
-            Activity #2
-        </label><br><br>
-
-        <label>
-            <input type="checkbox" name="step3">
-            Activity #3
-        </label><br><br>
-
+        <br>
         <button type="submit">Finish</button>
     </form>
+
+    <script>
+        const sequences = {
+            1: ["Pick your appetizer", "Choose a main course", "Schedule your pickup"],
+            2: ["Select dietary preferences", "Choose drink", "Confirm payment"],
+            3: ["Select protein", "Add two sides", "Confirm delivery address"],
+            6: ["Choose entrée", "Confirm spice level", "Add dessert"]
+        };
+
+        function loadSequence() {
+            const customerNumber = document.getElementById("customer-number").value.trim();
+            const steps = sequences[customerNumber];
+            const container = document.getElementById("checkbox-container");
+
+            container.innerHTML = ""; // Clear previous checkboxes
+
+            if (steps) {
+                steps.forEach((step, index) => {
+                    const label = document.createElement("label");
+                    const checkbox = document.createElement("input");
+                    checkbox.type = "checkbox";
+                    checkbox.name = `step${index + 1}`;
+                    label.appendChild(checkbox);
+                    label.appendChild(document.createTextNode(` ${step}`));
+                    container.appendChild(label);
+                    container.appendChild(document.createElement("br"));
+                    container.appendChild(document.createElement("br"));
+                });
+            } else {
+                container.innerHTML = "<p>No sequence found for that customer number.</p>";
+            }
+        }
+    </script>
 </body>
 </html>
+
