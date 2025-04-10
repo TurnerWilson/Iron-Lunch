@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Thank You</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fefefe;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin: 0.5rem 0;
+    }
+
+    img {
+      width: 250px;
+      max-width: 90%;
+      margin: 1.5rem 0;
+    }
+
+    .afternoon-line {
+      font-size: 1.5rem;
+      margin-top: 3rem;
+    }
+
+    .highlight {
+      font-weight: bold;
+      color: #cc0000;
+      transition: opacity 0.6s ease;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Bada Bing</h1>
+
+  <!-- You can replace this with your own gif if you like -->
+  <img src="https://media.giphy.com/media/l41lFw057lAJQMwg0/giphy.gif" alt="Celebration GIF" />
+
+  <h1>Bada Boom</h1>
+
+  <div class="afternoon-line">
+    Have a <span class="highlight" id="rotate-word">great</span> afternoon!
+  </div>
+
+  <script>
+    const words = ["great", "productive", "enjoyable", "delectable"];
+    let i = 0;
+    const wordSpan = document.getElementById("rotate-word");
+
+    setInterval(() => {
+      i = (i + 1) % words.length;
+      wordSpan.style.opacity = 0;
+      setTimeout(() => {
+        wordSpan.textContent = words[i];
+        wordSpan.style.opacity = 1;
+      }, 300);
+    }, 2000);
+  </script>
+
+</body>
+</html>
