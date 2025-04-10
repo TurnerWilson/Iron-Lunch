@@ -7,21 +7,37 @@
   <style>
     body {
       font-family: Arial, sans-serif;
+      margin: 0;
       padding: 2rem;
-      position: relative;
-      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f8f8f8;
+    }
+
+    form {
+      max-width: 400px;
+      width: 100%;
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
     }
 
     input[type="text"] {
       padding: 0.5rem;
-      width: 200px;
+      width: 80%;
       margin-bottom: 1rem;
+      font-size: 1rem;
     }
 
     button {
       padding: 0.5rem 1rem;
       margin-top: 1rem;
       font-size: 1rem;
+      cursor: pointer;
     }
 
     button:disabled {
@@ -32,47 +48,42 @@
     #checkbox-container {
       opacity: 0;
       transition: opacity 1.8s ease-in-out;
+      margin-top: 1rem;
     }
 
     #checkbox-container.visible {
       opacity: 1;
     }
 
-    /* Firework burst animation */
-    .firework {
-      position: absolute;
-      width: 8px;
-      height: 8px;
-      background: gold;
-      border-radius: 50%;
-      animation: explode 600ms ease-out forwards;
-      pointer-events: none;
-      z-index: 1000;
+    label {
+      display: inline-block;
+      text-align: left;
+      width: 100%;
+      margin-bottom: 0.5rem;
+      transition: all 0.6s ease;
     }
 
-    @keyframes explode {
-      0% {
-        opacity: 1;
-        transform: scale(1) translate(0, 0);
-      }
-      100% {
-        opacity: 0;
-        transform: scale(2) translate(var(--x), var(--y));
-      }
+    input[type="checkbox"] {
+      margin-right: 0.5rem;
+    }
+
+    input[type="checkbox"]:checked + span {
+      text-decoration: line-through;
+      opacity: 0.6;
+      transition: all 0.6s ease;
     }
   </style>
 </head>
 <body>
-  <h1>Complete Your Iron Lunch</h1>
-
   <form id="ironLunchForm">
+    <h1>Complete Your Iron Lunch</h1>
+
     <label for="customer-number">Type Your Customer Number:</label><br>
     <input type="text" id="customer-number" name="customer-number" placeholder="e.g. 3">
-    <button type="button" onclick="loadSequence()">Load Sequence</button><br><br>
+    <button type="button" onclick="loadSequence()">Load Sequence</button><br>
 
     <div id="checkbox-container"></div>
 
-    <br>
     <button type="submit" id="finish-btn" disabled>Finish</button>
   </form>
 
@@ -133,20 +144,20 @@
       if (steps) {
         steps.forEach((step, index) => {
           const label = document.createElement("label");
+
           const checkbox = document.createElement("input");
           checkbox.type = "checkbox";
           checkbox.name = `step${index + 1}`;
-          checkbox.addEventListener("change", (e) => {
+          checkbox.addEventListener("change", () => {
             checkCompletion();
-            if (e.target.checked) {
-              showFirework(e.target);
-            }
           });
+
+          const span = document.createElement("span");
+          span.textContent = ` ${step}`;
+
           label.appendChild(checkbox);
-          label.appendChild(document.createTextNode(` ${step}`));
+          label.appendChild(span);
           container.appendChild(label);
-          container.appendChild(document.createElement("br"));
-          container.appendChild(document.createElement("br"));
         });
 
         setTimeout(() => container.classList.add("visible"), 50);
@@ -161,28 +172,6 @@
       const finishButton = document.getElementById("finish-btn");
       const allChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
       finishButton.disabled = !allChecked;
-    }
-
-    function showFirework(element) {
-      const rect = element.getBoundingClientRect();
-      const firework = document.createElement("div");
-      firework.classList.add("firework");
-
-      const angle = Math.random() * 2 * Math.PI;
-      const distance = 100 + Math.random() * 50;
-      const x = Math.cos(angle) * distance + "px";
-      const y = Math.sin(angle) * distance + "px";
-
-      firework.style.setProperty("--x", x);
-      firework.style.setProperty("--y", y);
-      firework.style.left = rect.left + rect.width / 2 + "px";
-      firework.style.top = rect.top + rect.height / 2 + window.scrollY + "px";
-
-      document.body.appendChild(firework);
-
-      setTimeout(() => {
-        firework.remove();
-      }, 600);
     }
   </script>
 </body>
