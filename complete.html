@@ -21,6 +21,7 @@
     button {
       padding: 0.5rem 1rem;
       margin-top: 1rem;
+      font-size: 1rem;
     }
 
     button:disabled {
@@ -30,7 +31,7 @@
 
     #checkbox-container {
       opacity: 0;
-      transition: opacity 0.6s ease-in-out;
+      transition: opacity 1.8s ease-in-out;
     }
 
     #checkbox-container.visible {
@@ -77,14 +78,46 @@
 
   <script>
     const sequences = {
-      1: ["Pick your appetizer", "Choose a main course", "Schedule your pickup"],
-      2: ["Select dietary preferences", "Choose a drink", "Confirm payment"],
-      3: ["Select protein", "Add two sides", "Confirm delivery address"],
-      4: ["Enter promo code", "Choose cutlery option", "Leave delivery instructions"],
-      5: ["Pick from today's specials", "Confirm lunch time", "Save your preferences"],
-      6: ["Choose entrée", "Confirm spice level", "Add dessert"],
-      7: ["Select vegetarian or meat option", "Pick your drink", "Confirm order total"],
-      8: ["Input allergy info", "Choose packaging type", "Confirm satisfaction survey"]
+      1: [
+        "Meditate for 2 minutes",
+        "Write down three things you’re grateful for",
+        "Organize your to-do list"
+      ],
+      2: [
+        "Drink a glass of water",
+        "Stretch your neck and shoulders",
+        "Take a walk for 3–5 minutes"
+      ],
+      3: [
+        "Do 20 calf raises",
+        "Perform 10–15 squats",
+        "Take deep breaths (4–4–6 method)"
+      ],
+      4: [
+        "Eat a piece of fresh fruit",
+        "Walk around for 3–5 minutes",
+        "Listen to a favorite song"
+      ],
+      5: [
+        "Do 10 desk push-ups",
+        "Roll your ankles and wrists",
+        "Gently massage the area around your eyes"
+      ],
+      6: [
+        "Do a posture check and adjust your sitting position",
+        "Perform 20 shoulder rolls",
+        "Stretch your back and chest for 30 seconds"
+      ],
+      7: [
+        "Step outside for fresh air",
+        "Identify one priority task",
+        "Jot down a quick journal entry"
+      ],
+      8: [
+        "Organize your to-do list",
+        "Clear off your desk",
+        "Send a quick note of appreciation to a friend or coworker"
+      ]
     };
 
     function loadSequence() {
@@ -135,7 +168,6 @@
       const firework = document.createElement("div");
       firework.classList.add("firework");
 
-      // Random x/y spread for firework explosion
       const angle = Math.random() * 2 * Math.PI;
       const distance = 100 + Math.random() * 50;
       const x = Math.cos(angle) * distance + "px";
