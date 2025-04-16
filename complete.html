@@ -177,4 +177,38 @@
     }
   </script>
 </body>
+<script>
+  function submitToSheetDB() {
+    const customerNumber = document.getElementById("customer-number").value.trim();
+    const checkboxes = document.querySelectorAll('#checkbox-container input[type="checkbox"]');
+    const completedTasks = Array.from(checkboxes).map(cb => cb.checked ? "✓" : "✗");
+
+    // Post data to SheetDB
+    fetch("https://sheetdb.io/api/v1/5jz2lfh4tm0im", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        data: {
+          "Customer Number": customerNumber,
+          "Task 1": completedTasks[0],
+          "Task 2": completedTasks[1],
+          "Task 3": completedTasks[2],
+          "Timestamp": new Date().toISOString()
+        }
+      })
+    })
+    .then(response => {
+      window.location.href = "thankyou.html"; // Redirect after submit
+    });
+  }
+
+  // Hook into the form submit
+  document.getElementById("ironLunchForm").addEventListener("submit", function(event) {
+    event.preventDefault();
+    submitToSheetDB();
+  });
+</script>
+
 </html>
