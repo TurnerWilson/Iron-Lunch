@@ -191,11 +191,13 @@
       },
       body: JSON.stringify({
         data: {
-          "Customer Number": customerNumber,
-          "Task 1": completedTasks[0],
-          "Task 2": completedTasks[1],
-          "Task 3": completedTasks[2],
-          "Timestamp": new Date().toISOString()
+      "Timestamp": new Date().toISOString(),
+      "Customer Number": customerNumber,
+      "Task 1": completedTasks[0],
+      "Task 2": completedTasks[1],
+      "Task 3": completedTasks[2],
+      "Email Address": ""
+      "Email Sent": ""
         }
       })
     })
