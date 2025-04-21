@@ -1,22 +1,83 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IRON LUNCH</title>
+  <meta charset="UTF-8">
+  <title>Iron Lunch</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #fff;
+      animation: fadeIn 2s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    h1 {
+      margin-top: 60px;
+      margin-bottom: 40px;
+      font-size: 48px;
+      font-weight: bold;
+      text-align: center;
+      color: #333;
+    }
+
+    .row {
+      display: flex;
+      justify-content: center;
+      margin: 20px 0;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .box {
+      padding: 20px 30px;
+      border: 1px solid #333;
+      border-radius: 8px;
+      text-align: center;
+      text-decoration: none;
+      color: #333;
+      font-weight: bold;
+      transition: background 0.3s, color 0.3s;
+      min-width: 180px;
+    }
+
+    .box:hover {
+      background: #333;
+      color: #fff;
+    }
+
+    .row.bottom .box {
+      min-width: 140px;
+    }
+  </style>
 </head>
 <body>
-    <h1>IRON LUNCH</h1>
-        <a href="https://docs.google.com/forms/d/e/1FAIpQLSc25wTJRKK86_SyULZkZBuKlJ0YzAXwbN9F23-5Zsfa7Cr87w/viewform?usp=dialog" target="_blank">
-        On-Boarding Survey
-        </a>
-     <p> <a href= "/complete"> Complete your Iron Lunch
-        </a> </p>
-    <p> <a href= "https://google.com"> Feedback Survey
-        </a> </p>
-</h2>
+
+  <h1>IRON LUNCH</h1>
+
+  <div class="row top">
+    <a href="https://YOUR-ONBOARDING-LINK" class="box">Onboarding</a>
+    <a href="https://YOUR-COMPLETE-LINK" class="box">Complete Your Iron Lunch</a>
+    <a href="https://YOUR-FEEDBACK-LINK" class="box">Feedback Survey</a>
+  </div>
+
+  <div class="row bottom">
+    <a href="https://YOUR-ABOUT-LINK" class="box">About</a>
+    <a href="https://YOUR-BONUS-POINTS-LINK" class="box">Did Somebody Say BONUS POINTS?</a>
+  </div>
+
 </body>
 </html>
+
 
 
 
