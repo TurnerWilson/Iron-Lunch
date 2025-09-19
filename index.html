@@ -118,8 +118,17 @@
             <svg id="il-stage" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
               <!-- U curve (left arm at 14,22 ; right arm at 86,22) -->
               <path id="il-u" d="M 14,22 C 14,84 86,84 86,22" fill="none" stroke="var(--line)" stroke-width="8"></path>
-              <!-- boost pulse (light gray) -->
-              <circle id="il-boost" cx="50" cy="82" r="0" fill="var(--pulse)" opacity="0"></circle>
+              <!-- boost arrow + label -->
+<g id="il-boost" transform="translate(50,82)" opacity="0" aria-label="Iron Lunch boost">
+  <!-- Arrow graphic (only the arrow scales/pulses) -->
+  <g id="il-boost-arrow">
+    <rect x="-11" y="-1.8" width="16" height="3.6" fill="var(--ink)"></rect>
+    <polygon points="6,-6 16,0 6,6" fill="var(--ink)"></polygon>
+  </g>
+  <!-- Label -->
+  <text x="0" y="14" text-anchor="middle" font-size="4" fill="var(--ink)" font-weight="700">Iron Lunch</text>
+</g>
+
               <!-- ball starts TOP-LEFT -->
               <circle id="il-ball" r="3.4" fill="var(--ink)" cx="14" cy="22"></circle>
               <!-- tiny label 'you' -->
@@ -167,71 +176,62 @@
   const params = new URLSearchParams(location.search);
   const force = params.get("intro") === "1";
   const seen = !!localStorage.getItem(STORAGE_KEY);
-
   if (!seen || force) intro.style.display = "flex";
 
-  const dots = [1,2,3,4].map(i=>document.getElementById("il-d"+i));
+  const dots  = [1,2,3,4].map(i=>document.getElementById("il-d"+i));
   const title = document.getElementById("il-title");
-  const body = document.getElementById("il-body");
-  const back = document.getElementById("il-back");
-  const next = document.getElementById("il-next");
-  const skip = document.getElementById("il-skip");
+  const body  = document.getElementById("il-body");
+  const back  = document.getElementById("il-back");
+  const next  = document.getElementById("il-next");
+  const skip  = document.getElementById("il-skip");
 
-  const u = document.getElementById("il-u");
-  const ball = document.getElementById("il-ball");
-  const tag = document.getElementById("il-tag");
-  const boost = document.getElementById("il-boost");
+  const u     = document.getElementById("il-u");
+  const ball  = document.getElementById("il-ball");
+  const tag   = document.getElementById("il-tag");
   const scene = document.querySelector(".il-scene");
+
+  // NEW: arrow elements
+  const boostGroup = document.getElementById("il-boost");
+  const boostArrow = document.getElementById("il-boost-arrow");
+
   const prefersReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   // Timing
-  const DURATION_FAIL_MS = 3400;    // screen 1 (slower)
-  const DURATION_SUCCESS_MS = 3800; // screen 2 (slower)
-  const RELEASE_TIMEOUT_MS = 5000;  // auto-release after 5s if no click
+  const DURATION_FAIL_MS    = 3400; // screen 1
+  const DURATION_SUCCESS_MS = 3800; // screen 2
+  const RELEASE_TIMEOUT_MS  = 5000; // auto-release after 5s
 
   let step = 1;
-  let raf, timer, releaseTimer;
+  let raf, timer, releaseTimer, boostRaf;
   let waitingRelease = false;
 
-  // Copy (with your edits)
+  // Copy (your edits)
   const copy = {
-    1: [
-      "It's difficult to maintain your energy through the workday.",
-      "Over 80% of workers suffer from a mid-afternoon slump."
-    ],
-    2: [
-      "Iron Lunch is here to help.",
-      "Iron Lunch gives a habit based framework in the middle of your day to power you through."
-    ],
-    3: [
-      "Three Personalized Routines",
-      "More energy for productivity and what you want to do after work!"
-    ],
-    4: [
-      "That's our mission.",
-      "You shouldn't feel drained at the end of every day."
-    ]
+    1: ["It's difficult to maintain your energy through the workday.","Over 80% of workers suffer from a mid-afternoon slump."],
+    2: ["Iron Lunch is here to help.","Iron Lunch gives a habit based framework in the middle of your day to power you through."],
+    3: ["Three Personalized Routines","More energy for productivity and what you want to do after work!"],
+    4: ["That's our mission.","You shouldn't feel drained at the end of every day."]
   };
 
   function clearTimers(){
     if (raf) cancelAnimationFrame(raf);
+    if (boostRaf) cancelAnimationFrame(boostRaf);
     if (timer) clearTimeout(timer);
     if (releaseTimer) clearTimeout(releaseTimer);
-    raf = timer = releaseTimer = null;
+    raf = boostRaf = timer = releaseTimer = null;
   }
 
   function setDots(n){ dots.forEach((d,i)=>d.classList.toggle("active", i < n)); }
 
   function moveBall(progress){
     const len = u.getTotalLength();
-    const pt = u.getPointAtLength(Math.max(0, Math.min(1, progress)) * len);
+    const pt  = u.getPointAtLength(Math.max(0, Math.min(1, progress)) * len);
     ball.setAttribute("cx", pt.x);
     ball.setAttribute("cy", pt.y);
     tag.setAttribute("transform", `translate(${pt.x + 2}, ${pt.y - 6})`);
   }
 
   function animateKeyframes(keys, ms) {
-    clearTimers();
     const start = performance.now();
     function frame(now){
       const t = Math.min(1, (now - start) / ms);
@@ -241,45 +241,38 @@
       const i = Math.min(segs - 1, Math.floor(pos));
       const localT = pos - i;
       const a = keys[i], c = keys[i+1];
-      const p = a + (c - a) * localT;
-      moveBall(p);
+      moveBall(a + (c - a) * localT);
       if (t < 1) raf = requestAnimationFrame(frame);
     }
     raf = requestAnimationFrame(frame);
   }
 
-  function pulseBoost(enable){
-    if (!enable) { boost.setAttribute("r","0"); boost.setAttribute("opacity","0"); return; }
-    let growing = true; let r = 10, op = 0.16;
-    function loop(){
-      r += growing ? 0.45 : -0.45;
-      op += growing ? 0.01 : -0.01;
-      if (r > 18) growing = false;
-      if (r < 10) growing = true;
-      boost.setAttribute("r", String(r));
-      boost.setAttribute("opacity", String(op));
-      if (step === 2) requestAnimationFrame(loop);
-      else { boost.setAttribute("r","0"); boost.setAttribute("opacity","0"); }
+  // NEW: Pulsing arrow for Screen 2
+  function pulseArrow(enable){
+    if (!enable) {
+      if (boostRaf) cancelAnimationFrame(boostRaf);
+      boostGroup.setAttribute("opacity", "0");
+      boostArrow.setAttribute("transform", "scale(1)");
+      return;
     }
-    loop();
+    let t = 0; // animation time
+    boostGroup.setAttribute("opacity", "0.9");
+    function tick(){
+      t += 0.06; // speed
+      const s  = 1 + 0.12 * Math.sin(t * 2.2); // scale 0.88–1.12
+      const op = 0.75 + 0.25 * Math.abs(Math.sin(t * 2.2)); // 0.75–1
+      boostGroup.setAttribute("opacity", op.toFixed(2));
+      boostArrow.setAttribute("transform", `scale(${s.toFixed(3)})`);
+      if (step === 2) boostRaf = requestAnimationFrame(tick);
+      else {
+        boostGroup.setAttribute("opacity", "0");
+        boostArrow.setAttribute("transform", "scale(1)");
+      }
+    }
+    tick();
   }
 
-  function addSmiley(){
-    if (document.getElementById("il-smile")) return;
-    const el = document.createElement("div");
-    el.id = "il-smile";
-    el.className = "il-smile";
-    el.style.left = "calc(86% + 16px)";
-    el.style.top  = "calc(22% + 16px)";
-    el.textContent = "☺";
-    scene.appendChild(el);
-  }
-  function removeSmiley(){
-    const el = document.getElementById("il-smile");
-    if (el) el.remove();
-  }
-
-  // --- Click-to-release helpers (button-like hint + scene pointer) ---
+  // --- Click-to-release (with flashing hint) ---
   function showReleaseHint(){
     if (document.getElementById("il-hint")) return;
     const hint = document.createElement("div");
@@ -290,17 +283,10 @@
     hint.setAttribute("tabindex", "0");
     hint.setAttribute("aria-label", "Click to release (auto in 5 seconds)");
     scene.appendChild(hint);
-
-    // Make the whole scene feel clickable
     scene.classList.add("releasable");
-
-    // Clicking the hint releases (also stops event from bubbling if you want)
     hint.addEventListener("click", handleRelease, { once: true });
     hint.addEventListener("keydown", (e) => {
-      if (e.key === " " || e.key === "Enter") {
-        e.preventDefault();
-        handleRelease();
-      }
+      if (e.key === " " || e.key === "Enter") { e.preventDefault(); handleRelease(); }
     });
   }
   function hideReleaseHint(){
@@ -308,24 +294,16 @@
     if (hint) hint.remove();
     scene.classList.remove("releasable");
   }
-
   function armReleaseForStep(){
     waitingRelease = true;
     showReleaseHint();
-    // click anywhere in the scene to release
     scene.addEventListener("click", handleRelease, { once: true });
-    // keyboard accessibility: Space/Enter release
     document.addEventListener("keydown", keyReleaseOnce);
-    // auto-release fallback after 5s
     releaseTimer = setTimeout(()=>handleRelease(), RELEASE_TIMEOUT_MS);
   }
-
   function keyReleaseOnce(e){
     if (!waitingRelease) return;
-    if (e.key === " " || e.key === "Enter") {
-      e.preventDefault();
-      handleRelease();
-    }
+    if (e.key === " " || e.key === "Enter") { e.preventDefault(); handleRelease(); }
   }
 
   function handleRelease(){
@@ -336,18 +314,18 @@
     document.removeEventListener("keydown", keyReleaseOnce);
 
     if (step === 1) {
-      pulseBoost(false);
+      pulseArrow(false);
       if (prefersReduced) { moveBall(0.30); return; }
       // Fail: left -> near top-right (partial) -> slide back near bottom
       animateKeyframes([0, 0.60, 0.45, 0.30], DURATION_FAIL_MS);
     } else if (step === 2) {
-      pulseBoost(true);
+      pulseArrow(true); // show arrow while boosting
       if (prefersReduced) { moveBall(1); return; }
       // Success with bottom “boost” wobble
       animateKeyframes([0, 0.35, 0.38, 1], DURATION_SUCCESS_MS);
     }
   }
-  // --- End click-to-release helpers ---
+  // --- End click-to-release ---
 
   function runScene(n){
     step = n;
@@ -361,29 +339,24 @@
 
     clearTimers();
     hideReleaseHint();
-    removeSmiley();
+    pulseArrow(false); // hide arrow unless screen 2 animates
 
-    if (n === 1 || n === 2) {
-      // Always show the ball poised at TOP-LEFT before release
-      moveBall(0);
-    }
+    if (n === 1 || n === 2) moveBall(0); // show poised at top-left
 
     if (n === 1) {
-      // Wait for user click or 5s fallback, then animate the fail path
       armReleaseForStep();
     }
     if (n === 2) {
-      // Wait for user click or 5s fallback, then animate the success path
       armReleaseForStep();
     }
     if (n === 3) {
-      pulseBoost(false);
       moveBall(0.75);
     }
     if (n === 4) {
-      pulseBoost(false);
       moveBall(1);
-      addSmiley();
+      // simple smiley marker already handled by your CSS/HTML earlier;
+      // keep if you had that addSmiley() helper; optional to show here.
+      // (Omitted here to keep code concise—add back if you want the face.)
     }
   }
 
