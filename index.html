@@ -144,30 +144,47 @@
   const ball = document.getElementById("il-ball");
   const tag = document.getElementById("il-tag");
   const boost = document.getElementById("il-boost");
+  const scene = document.querySelector(".il-scene");
   const prefersReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  // NEW: delay & slower durations so users see the release
-  const START_DELAY_MS = 750;      // pause before the ball starts moving
-  const DURATION_FAIL_MS = 3400;   // screen 1 (slower)
-  const DURATION_SUCCESS_MS = 3800;// screen 2 (slower)
+  // Timing
+  const DURATION_FAIL_MS = 3400;    // screen 1 (slower)
+  const DURATION_SUCCESS_MS = 3800; // screen 2 (slower)
+  const RELEASE_TIMEOUT_MS = 5000;  // auto-release after 5s if no click
 
   let step = 1;
-  let raf, timer;
+  let raf, timer, releaseTimer;
+  let waitingRelease = false;
 
+  // Copy updates
   const copy = {
-    1: ["It's difficult to maintain your energy through the workday.","Without support, your day gathers speed but stalls before the finish."],
-    2: ["Iron Lunch is here to help.","A quick, science-backed boost at midday powers you over the afternoon hump."],
-    3: ["Three personalized routines.","Iron Lunch gives you three personalized routines to power through your afternoon, helping you be more productive and have more energy to do what you love after work."],
-    4: ["A healthier, happier workday.","More energy for what matters after work—without burning out at noon."]
+    1: [
+      "It's difficult to maintain your energy through the workday.",
+      "Over 80% of workers suffer from a mid-afternoon slump."
+    ],
+    2: [
+      "Iron Lunch is here to help.",
+      "Iron Lunch gives a habit based framework in the middle of your day to power you through."
+    ],
+    3: [
+      "Three Personalized Routines",
+      "More energy for productivity and what you want to do after work!"
+    ],
+    4: [
+      "That's our mission.",
+      "You shouldn't feel drained at the end of every day."
+    ]
   };
 
-  function clearAnims(){
+  function clearTimers(){
     if (raf) cancelAnimationFrame(raf);
     if (timer) clearTimeout(timer);
-    raf = null; timer = null;
+    if (releaseTimer) clearTimeout(releaseTimer);
+    raf = timer = releaseTimer = null;
   }
 
   function setDots(n){ dots.forEach((d,i)=>d.classList.toggle("active", i < n)); }
+
   function moveBall(progress){
     const len = u.getTotalLength();
     const pt = u.getPointAtLength(Math.max(0, Math.min(1, progress)) * len);
@@ -175,8 +192,9 @@
     ball.setAttribute("cy", pt.y);
     tag.setAttribute("transform", `translate(${pt.x + 2}, ${pt.y - 6})`);
   }
+
   function animateKeyframes(keys, ms) {
-    clearAnims();
+    clearTimers();
     const start = performance.now();
     function frame(now){
       const t = Math.min(1, (now - start) / ms);
@@ -192,11 +210,12 @@
     }
     raf = requestAnimationFrame(frame);
   }
+
   function pulseBoost(enable){
     if (!enable) { boost.setAttribute("r","0"); boost.setAttribute("opacity","0"); return; }
     let growing = true; let r = 10, op = 0.16;
     function loop(){
-      r += growing ? 0.45 : -0.45;  // slower pulse
+      r += growing ? 0.45 : -0.45;
       op += growing ? 0.01 : -0.01;
       if (r > 18) growing = false;
       if (r < 10) growing = true;
@@ -207,84 +226,32 @@
     }
     loop();
   }
+
   function addSmiley(){
     if (document.getElementById("il-smile")) return;
-    const host = document.querySelector(".il-scene");
     const el = document.createElement("div");
     el.id = "il-smile";
     el.className = "il-smile";
     el.style.left = "calc(86% + 16px)";
     el.style.top  = "calc(22% + 16px)";
     el.textContent = "☺";
-    host.appendChild(el);
+    scene.appendChild(el);
   }
   function removeSmiley(){
     const el = document.getElementById("il-smile");
     if (el) el.remove();
   }
 
-  function runScene(n){
-    step = n;
-    setDots(n);
-    back.disabled = (n === 1);
-    // NEW: change final CTA text
-    next.textContent = (n < 4) ? "Continue" : "Get Started";
-    next.className = "il-btn " + (n < 4 ? "il-btn-primary" : "il-btn-success");
+  // --- Click-to-release helpers ---
+  function showReleaseHint(){
+    if (document.getElementById("il-hint")) return;
+    const hint = document.createElement("div");
+    hint.id = "il-hint";
+    hint.textContent = "Click to release";
+    hint.style.position = "absolute";
+    hint.style.left = "50%";
+    hint.st
 
-    title.textContent = copy[n][0];
-    body.textContent  = copy[n][1];
-
-    clearAnims();
-    removeSmiley();
-
-    // Always place the ball at TOP-LEFT before starting 1 & 2,
-    // then wait a short moment so users *see* the starting position.
-    if (n === 1 || n === 2) moveBall(0);
-
-    if (n === 1) {
-      pulseBoost(false);
-      if (prefersReduced) { moveBall(0.30); return; }
-      timer = setTimeout(() => {
-        // Fail path: left -> near top-right (partial) -> slide back near bottom
-        animateKeyframes([0, 0.60, 0.45, 0.30], DURATION_FAIL_MS);
-      }, START_DELAY_MS);
-    }
-    if (n === 2) {
-      pulseBoost(true);
-      if (prefersReduced) { moveBall(1); return; }
-      timer = setTimeout(() => {
-        // Success path with small “boost” wobble at the bottom
-        animateKeyframes([0, 0.35, 0.38, 1], DURATION_SUCCESS_MS);
-      }, START_DELAY_MS);
-    }
-    if (n === 3) {
-      pulseBoost(false);
-      moveBall(0.75);
-    }
-    if (n === 4) {
-      pulseBoost(false);
-      moveBall(1);
-      addSmiley();
-    }
-  }
-
-  // controls
-  back.addEventListener("click", () => runScene(Math.max(1, step - 1)));
-  next.addEventListener("click", () => {
-    if (step < 4) runScene(step + 1);
-    else { localStorage.setItem(STORAGE_KEY, "1"); intro.style.display = "none"; }
-  });
-  skip.addEventListener("click", () => { localStorage.setItem(STORAGE_KEY, "1"); intro.style.display = "none"; });
-  document.addEventListener("keydown", (e)=>{
-    if (intro.style.display !== "flex") return;
-    if (e.key === "Escape") { localStorage.setItem(STORAGE_KEY, "1"); intro.style.display = "none"; }
-    if (e.key === "ArrowRight" || e.key === "Enter" || e.key === " ") { next.click(); }
-    if (e.key === "ArrowLeft") { back.click(); }
-  });
-
-  if (intro.style.display === "flex") runScene(1);
-})();
-</script>
 
 
   <noscript><!-- If JS is off, the intro won't show; page stays usable --></noscript>
