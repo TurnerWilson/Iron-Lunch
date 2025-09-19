@@ -250,10 +250,118 @@
     hint.textContent = "Click to release";
     hint.style.position = "absolute";
     hint.style.left = "50%";
-    hint.st
+    hint.style.bottom = "16px";
+    hint.style.transform = "translateX(-50%)";
+    hint.style.padding = "8px 12px";
+    hint.style.border = "1px solid #e5e7eb";
+    hint.style.borderRadius = "12px";
+    hint.style.background = "#fff";
+    hint.style.color = "#111";
+    hint.style.fontWeight = "700";
+    hint.style.fontSize = "12px";
+    hint.style.boxShadow = "0 4px 10px rgba(0,0,0,.08)";
+    scene.appendChild(hint);
+  }
+  function hideReleaseHint(){
+    const hint = document.getElementById("il-hint");
+    if (hint) hint.remove();
+  }
 
+  function armReleaseForStep(){
+    waitingRelease = true;
+    showReleaseHint();
+    // click anywhere in the scene to release
+    scene.addEventListener("click", handleRelease, { once: true });
+    // keyboard accessibility: Space/Enter release
+    document.addEventListener("keydown", keyReleaseOnce);
+    // auto-release fallback after 5s
+    releaseTimer = setTimeout(()=>handleRelease(), RELEASE_TIMEOUT_MS);
+  }
 
+  function keyReleaseOnce(e){
+    if (!waitingRelease) return;
+    if (e.key === " " || e.key === "Enter") {
+      e.preventDefault();
+      handleRelease();
+    }
+  }
 
+  function handleRelease(){
+    if (!waitingRelease) return;
+    waitingRelease = false;
+    hideReleaseHint();
+    clearTimeout(releaseTimer);
+    document.removeEventListener("keydown", keyReleaseOnce);
+
+    if (step === 1) {
+      pulseBoost(false);
+      if (prefersReduced) { moveBall(0.30); return; }
+      // Fail: left -> near top-right (partial) -> slide back near bottom
+      animateKeyframes([0, 0.60, 0.45, 0.30], DURATION_FAIL_MS);
+    } else if (step === 2) {
+      pulseBoost(true);
+      if (prefersReduced) { moveBall(1); return; }
+      // Success with bottom “boost” wobble
+      animateKeyframes([0, 0.35, 0.38, 1], DURATION_SUCCESS_MS);
+    }
+  }
+  // --- End click-to-release helpers ---
+
+  function runScene(n){
+    step = n;
+    setDots(n);
+    back.disabled = (n === 1);
+    next.textContent = (n < 4) ? "Continue" : "Get Started";
+    next.className = "il-btn " + (n < 4 ? "il-btn-primary" : "il-btn-success");
+
+    title.textContent = copy[n][0];
+    body.textContent  = copy[n][1];
+
+    clearTimers();
+    hideReleaseHint();
+    removeSmiley();
+
+    if (n === 1 || n === 2) {
+      // Always show the ball poised at TOP-LEFT before release
+      moveBall(0);
+    }
+
+    if (n === 1) {
+      // Wait for user click or 5s fallback, then animate the fail path
+      armReleaseForStep();
+    }
+    if (n === 2) {
+      // Wait for user click or 5s fallback, then animate the success path
+      armReleaseForStep();
+    }
+    if (n === 3) {
+      pulseBoost(false);
+      moveBall(0.75);
+    }
+    if (n === 4) {
+      pulseBoost(false);
+      moveBall(1);
+      addSmiley();
+    }
+  }
+
+  // controls
+  back.addEventListener("click", () => runScene(Math.max(1, step - 1)));
+  next.addEventListener("click", () => {
+    if (step < 4) runScene(step + 1);
+    else { localStorage.setItem(STORAGE_KEY, "1"); intro.style.display = "none"; }
+  });
+  skip.addEventListener("click", () => { localStorage.setItem(STORAGE_KEY, "1"); intro.style.display = "none"; });
+  document.addEventListener("keydown", (e)=>{
+    if (intro.style.display !== "flex") return;
+    if (e.key === "Escape") { localStorage.setItem(STORAGE_KEY, "1"); intro.style.display = "none"; }
+    if (!waitingRelease && (e.key === "ArrowRight")) { next.click(); }
+    if (!waitingRelease && (e.key === "ArrowLeft")) { back.click(); }
+  });
+
+  if (intro.style.display === "flex") runScene(1);
+})();
+</script>
   <noscript><!-- If JS is off, the intro won't show; page stays usable --></noscript>
 </body>
 </html>
