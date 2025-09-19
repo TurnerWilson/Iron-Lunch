@@ -154,6 +154,18 @@
     50%  { box-shadow: 0 0 0 8px rgba(47,75,182,0);   transform: translateX(-50%) scale(1.045); }
     100% { box-shadow: 0 0 0 0 rgba(47,75,182,0);     transform: translateX(-50%) scale(1); }
   }
+    .footer-logo {
+  margin-top: auto;
+  margin-bottom: 40px;   /* space from bottom */
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.footer-logo img {
+  max-width: 200px;   /* adjust as needed */
+  height: auto;
+}
 </style>
 </head>
 <body>
@@ -438,5 +450,11 @@
 })();
 </script>
   <noscript><!-- If JS is off, the intro won't show; page stays usable --></noscript>
+    <!-- Logo footer -->
+  <div class="footer-logo">
+    <img src="logo.png" alt="Iron Lunch logo">
+  </div>
+</body>
+
 </body>
 </html>
