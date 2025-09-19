@@ -130,6 +130,141 @@
   </div>
 
   <div class="row bottom">
-    <a href="/about.html" clas
+    <a href="/about.html" class="box">About</a>
+    <a href="/bonus.html" class="box">Did Somebody Say BONUS POINTS?</a>
+  </div>
 
+  <!-- Onboarding script (new) -->
+  <script>
+  (function(){
+    const STORAGE_KEY = "il-onboarded-v1";
+    const intro = document.getElementById("il-intro");
+    const params = new URLSearchParams(location.search);
+    const force = params.get("intro") === "1";
+    const seen = !!localStorage.getItem(STORAGE_KEY);
 
+    // show if first time or forced
+    if (!seen || force) intro.style.display = "flex";
+
+    const dots = [1,2,3,4].map(i=>document.getElementById("il-d"+i));
+    const title = document.getElementById("il-title");
+    const body = document.getElementById("il-body");
+    const back = document.getElementById("il-back");
+    const next = document.getElementById("il-next");
+    const skip = document.getElementById("il-skip");
+
+    const stage = document.getElementById("il-stage");
+    const u = document.getElementById("il-u");
+    const ball = document.getElementById("il-ball");
+    const tag = document.getElementById("il-tag");
+    const boost = document.getElementById("il-boost");
+    const prefersReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    let step = 1;
+    let raf;
+
+    const copy = {
+      1: ["It's difficult to maintain your energy through the workday.","Without support, your day gathers speed but stalls before the finish."],
+      2: ["Iron Lunch is here to help.","A quick, science-backed boost at midday powers you over the afternoon hump."],
+      3: ["Three personalized routines.","Iron Lunch gives you three personalized routines to power through your afternoon, helping you be more productive and have more energy to do what you love after work."],
+      4: ["A healthier, happier workday.","More energy for what matters after work—without burning out at noon."]
+    };
+
+    function setDots(n){ dots.forEach((d,i)=>d.classList.toggle("active", i < n)); }
+    function moveBall(progress){
+      const len = u.getTotalLength();
+      const pt = u.getPointAtLength(Math.max(0, Math.min(1, progress)) * len);
+      ball.setAttribute("cx", pt.x);
+      ball.setAttribute("cy", pt.y);
+      tag.setAttribute("transform", `translate(${pt.x + 2}, ${pt.y - 6})`);
+    }
+    function animateKeyframes(keys, ms) {
+      cancelAnimationFrame(raf);
+      const start = performance.now();
+      function frame(now){
+        const t = Math.min(1, (now - start) / ms);
+        const e = 0.5 * (1 - Math.cos(Math.PI * t)); // easeInOut
+        const segs = keys.length - 1;
+        const pos = e * segs;
+        const i = Math.min(segs - 1, Math.floor(pos));
+        const localT = pos - i;
+        const a = keys[i], c = keys[i+1];
+        const p = a + (c - a) * localT;
+        moveBall(p);
+        if (t < 1) raf = requestAnimationFrame(frame);
+      }
+      raf = requestAnimationFrame(frame);
+    }
+    function pulseBoost(enable){
+      if (!enable) { boost.setAttribute("r","0"); boost.setAttribute("opacity","0"); return; }
+      let growing = true; let r = 10, op = 0.2;
+      function loop(){
+        r += growing ? 0.6 : -0.6;
+        op += growing ? 0.015 : -0.015;
+        if (r > 18) growing = false;
+        if (r < 10) growing = true;
+        boost.setAttribute("r", String(r));
+        boost.setAttribute("opacity", String(op));
+        if (step === 2) requestAnimationFrame(loop);
+        else { boost.setAttribute("r","0"); boost.setAttribute("opacity","0"); }
+      }
+      loop();
+    }
+    function addSmiley(){
+      if (document.getElementById("il-smile")) return;
+      const host = document.querySelector(".il-scene");
+      const el = document.createElement("div");
+      el.id = "il-smile";
+      el.className = "il-smile";
+      // place near top-right U end (approx 86,22 in viewBox coords)
+      el.style.left = "calc(86% + 16px)";
+      el.style.top  = "calc(22% + 16px)";
+      el.textContent = "☺";
+      host.appendChild(el);
+    }
+    function runScene(n){
+      step = n;
+      setDots(n);
+      back.disabled = (n === 1);
+      next.textContent = (n < 4) ? "Continue" : "Got it";
+      title.textContent = copy[n][0];
+      body.textContent  = copy[n][1];
+
+      if (n === 1) {
+        pulseBoost(false);
+        if (prefersReduced) { moveBall(0.30); return; }
+        animateKeyframes([0, 0.55, 0.35], 2200); // fail & slide back
+      }
+      if (n === 2) {
+        pulseBoost(true);
+        if (prefersReduced) { moveBall(1); return; }
+        animateKeyframes([0, 0.36, 0.38, 1], 2400); // boost, succeed
+      }
+      if (n === 3) { pulseBoost(false); moveBall(0.75); }
+      if (n === 4) { pulseBoost(false); moveBall(1); addSmiley(); }
+    }
+
+    // controls
+    back.addEventListener("click", () => runScene(Math.max(1, step - 1)));
+    next.addEventListener("click", () => {
+      if (step < 4) runScene(step + 1);
+      else { localStorage.setItem(STORAGE_KEY, "1"); intro.style.display = "none"; }
+    });
+    skip.addEventListener("click", () => { localStorage.setItem(STORAGE_KEY, "1"); intro.style.display = "none"; });
+    document.addEventListener("keydown", (e)=>{
+      if (intro.style.display !== "flex") return;
+      if (e.key === "Escape") { localStorage.setItem(STORAGE_KEY, "1"); intro.style.display = "none"; }
+      if (e.key === "ArrowRight" || e.key === "Enter" || e.key === " ") { next.click(); }
+      if (e.key === "ArrowLeft") { back.click(); }
+    });
+
+    // start
+    runScene(1);
+  })();
+  </script>
+
+  <noscript>
+    <!-- If JS is off, the intro won't show; page stays usable -->
+  </noscript>
+</body>
+</html>
