@@ -186,17 +186,16 @@
     // Post data to SheetDB
     fetch("https://sheetdb.io/api/v1/5jz2lfh4tm0im", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         data: {
-      "Timestamp": Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24)).toString(),
-      "Customer Number": customerNumber,
-      "Task 1": completedTasks[0],
-      "Task 2": completedTasks[1],
-      "Task 3": completedTasks[2]
-        }
+          "Timestamp": new Date().toISOString(),   // ✅ real timestamp
+          "Customer Number": customerNumber,
+          "Completion 1": completedTasks[0],
+          "Completion 2": completedTasks[1],
+          "Completion 3": completedTasks[2]
+        },
+        sheet: "Raw Data"   // ✅ point to your new tab
       })
     })
     .then(response => {
@@ -210,5 +209,4 @@
     submitToSheetDB();
   });
 </script>
-
 </html>
