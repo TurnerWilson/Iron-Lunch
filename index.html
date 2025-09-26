@@ -455,42 +455,6 @@
     <img src="logo.png" alt="Iron Lunch logo">
   </div>
 </body>
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Iron Lunch</title>
-</head>
-<body>
-  <h1>Iron Lunch Demo</h1>
-
-  <button onclick="reportCompletion(12345, 1)">Complete Day 1</button>
-  <button onclick="reportCompletion(12345, 2)">Complete Day 2</button>
-  <button onclick="reportCompletion(12345, 3)">Complete Day 3</button>
-  <script>
-  async function reportCompletion(customerNumber, day) {
-    const endpoint = https://sheetdb.io/api/v1/5jz2lfh4tm0im; // your SheetDB URL
-    const now = new Date().toISOString();
-
-    const row = {
-      "Timestamp": now,
-      "Customer Number": String(customerNumber)
-    };
-    row[`Completion ${day}`] = now;
-
-    const payload = {
-      data: row,
-      sheet: "Raw Data"
-    };
-
-    const res = await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-
-    console.log(await res.json());
-  }
-  </script>
 </body>
 </html>
 
