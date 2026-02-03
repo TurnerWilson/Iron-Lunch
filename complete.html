@@ -90,48 +90,81 @@
   </form>
 
   <script>
-    const sequences = {
-      544: [
-        "Trade Daniel Jones to Jamestown",
-        "Invite John Doud to Wedding",
-        "Cry Over Options at 01.02"
-      ],
-      2: [
-        "Drink a glass of water",
-        "Stretch your neck and shoulders",
-        "Take a walk for 3–5 minutes"
-      ],
-      3: [
-        "Do 20 calf raises",
-        "Perform 10–15 squats",
-        "Take deep breaths (4–4–6 method)"
-      ],
-      4: [
-        "Eat a piece of fresh fruit",
-        "Walk around for 3–5 minutes",
-        "Listen to a favorite song"
-      ],
-      5: [
-        "Do 10 desk push-ups",
-        "Roll your ankles and wrists",
-        "Gently massage the area around your eyes"
-      ],
-      6: [
-        "Do a posture check and adjust your sitting position",
-        "Perform 20 shoulder rolls",
-        "Stretch your back and chest for 30 seconds"
-      ],
-      7: [
-        "Step outside for fresh air",
-        "Identify one priority task",
-        "Jot down a quick journal entry"
-      ],
-      8: [
-        "Organize your to-do list",
-        "Clear off your desk",
-        "Send a quick note of appreciation to a friend or coworker"
-      ]
-    };
+  // 1) Define each sequence's actions once (so multiple sequence numbers can point to the same list)
+  const actionSets = {
+    MindfulnessMaster: [
+      "Meditate for 2 minutes",
+      "Write down three things you’re grateful for",
+      "Organize your to-do list"
+    ],
+    RefreshedRecharged: [
+      "Drink a glass of water",
+      "Stretch your neck and shoulders",
+      "Take a walk for 3–5 minutes"
+    ],
+    StrongSteady: [
+      "Do 20 calf raises",
+      "Perform 10–15 squats",
+      "Take deep breaths (4–4–6 method)"
+    ],
+    EnergyBoost: [
+      "Eat a piece of fresh fruit",
+      "Walk around for 3–5 minutes",
+      "Listen to a favorite song"
+    ],
+    AgilityExpert: [
+      "Do 10 desk push-ups",
+      "Roll your ankles and wrists",
+      "Gently massage the area around your eyes"
+    ],
+    PosturePro: [
+      "Do a posture check and adjust your sitting position",
+      "Perform 20 shoulder rolls",
+      "Stretch your back and chest for 30 seconds"
+    ],
+    MentalReset: [
+      "Step outside for fresh air",
+      "Identify one priority task",
+      "Jot down a quick journal entry"
+    ],
+    Productivity: [
+      "Organize your to-do list",
+      "Clear off your desk",
+      "Send a quick note of appreciation to a friend or coworker"
+    ]
+  };
+
+  // 2) Map sequence numbers to the *name* of the action set
+  //    (ADD NEW CUSTOMERS HERE)
+  const sequenceToName = {
+    1: "MindfulnessMaster",
+    78: "MindfulnessMaster",
+    2: "RefreshedRecharged",
+    3: "StrongSteady",
+    4: "EnergyBoost",
+    5: "AgilityExpert",
+    6: "PosturePro",
+    7: "MentalReset",
+    8: "Productivity"
+  };
+
+  // 3) Helper: get the name for a sequence number
+  function getSequenceName(sequenceNumber) {
+    return sequenceToName[sequenceNumber] || null;
+  }
+
+  // 4) Helper: get the actions for a sequence number
+  function getSequenceActions(sequenceNumber) {
+    const name = getSequenceName(sequenceNumber);
+    return name ? actionSets[name] : [];
+  }
+
+  // Example usage:
+  // const currentSequence = 78;
+  // console.log(getSequenceName(currentSequence));     // "MindfulnessMaster"
+  // console.log(getSequenceActions(currentSequence));  // ["Meditate...", "...", "..."]
+</script>
+
 
     function loadSequence() {
       const customerNumber = document.getElementById("customer-number").value.trim();
