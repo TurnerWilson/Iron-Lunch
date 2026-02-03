@@ -90,7 +90,10 @@
   </form>
 
   <script>
-  // 1) Define each sequence's actions once (so multiple sequence numbers can point to the same list)
+/* =========================
+     ACTION DEFINITIONS
+     ========================= */
+
   const actionSets = {
     MindfulnessMaster: [
       "Meditate for 2 minutes",
@@ -134,8 +137,10 @@
     ]
   };
 
-  // 2) Map sequence numbers to the *name* of the action set
-  //    (ADD NEW CUSTOMERS HERE)
+  /* =========================
+     SEQUENCE → NAME MAPPING
+     ========================= */
+
   const sequenceToName = {
     1: "MindfulnessMaster",
     78: "MindfulnessMaster",
@@ -148,96 +153,70 @@
     8: "Productivity"
   };
 
-  // 3) Helper: get the name for a sequence number
+  /* =========================
+     HELPERS
+     ========================= */
+
   function getSequenceName(sequenceNumber) {
     return sequenceToName[sequenceNumber] || null;
   }
 
-  // 4) Helper: get the actions for a sequence number
   function getSequenceActions(sequenceNumber) {
     const name = getSequenceName(sequenceNumber);
     return name ? actionSets[name] : [];
   }
 
-  // Example usage:
-  // const currentSequence = 78;
-  // console.log(getSequenceName(currentSequence));     // "MindfulnessMaster"
-  // console.log(getSequenceActions(currentSequence));  // ["Meditate...", "...", "..."]
+  /* =========================
+     MAIN LOGIC
+     ========================= */
 
-    function loadSequence() {
-      const customerNumber = document.getElementById("customer-number").value.trim();
-      const steps = sequences[customerNumber];
-      const container = document.getElementById("checkbox-container");
-      const finishButton = document.getElementById("finish-btn");
+  function loadSequence() {
+    const input = document.getElementById("customer-number").value.trim();
+    const customerNumber = Number(input);
 
-      container.classList.remove("visible");
-      container.innerHTML = "";
-      finishButton.disabled = true;
+    const container = document.getElementById("checkbox-container");
+    const finishButton = document.getElementById("finish-btn");
 
-      if (steps) {
-        steps.forEach((step, index) => {
-          const label = document.createElement("label");
+    // Reset UI
+    container.classList.remove("visible");
+    container.innerHTML = "";
+    finishButton.disabled = true;
 
-          const checkbox = document.createElement("input");
-          checkbox.type = "checkbox";
-          checkbox.name = `step${index + 1}`;
-          checkbox.addEventListener("change", () => {
-            checkCompletion();
-          });
+    const steps = getSequenceActions(customerNumber);
 
-          const span = document.createElement("span");
-          span.textContent = ` ${step}`;
-
-          label.appendChild(checkbox);
-          label.appendChild(span);
-          container.appendChild(label);
-        });
-
-        setTimeout(() => container.classList.add("visible"), 50);
-      } else {
-        container.innerHTML = "<p>No sequence found for that customer number. Please enter a number from 1 to 8.</p>";
-        container.classList.add("visible");
-      }
+    if (steps.length === 0) {
+      container.textContent =
+        "No sequence found for that customer number. Please enter a valid number.";
+      return;
     }
 
-    function checkCompletion() {
-      const checkboxes = document.querySelectorAll('#checkbox-container input[type="checkbox"]');
-      const finishButton = document.getElementById("finish-btn");
-      const allChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
-      finishButton.disabled = !allChecked;
-    }
-  </script>
-</body>
-<script>
-  function submitToSheetDB() {
-    const customerNumber = document.getElementById("customer-number").value.trim();
-    const checkboxes = document.querySelectorAll('#checkbox-container input[type="checkbox"]');
-    const completedTasks = Array.from(checkboxes).map(cb => cb.checked ? "✓" : "✗");
+    steps.forEach((step, index) => {
+      const label = document.createElement("label");
 
-    // Post data to SheetDB
-    fetch("https://sheetdb.io/api/v1/5jz2lfh4tm0im", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        data: {
-          "Timestamp": new Date().toISOString(),   // ✅ real timestamp
-          "Customer Number": customerNumber,
-          "Completion 1": completedTasks[0],
-          "Completion 2": completedTasks[1],
-          "Completion 3": completedTasks[2]
-        },
-        sheet: "Raw Data"   // ✅ point to your new tab
-      })
-    })
-    .then(response => {
-      window.location.href = "thankyou.html"; // Redirect after submit
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.name = `step${index + 1}`;
+      checkbox.addEventListener("change", checkCompletion);
+
+      const span = document.createElement("span");
+      span.textContent = step;
+
+      label.appendChild(checkbox);
+      label.appendChild(span);
+      container.appendChild(label);
     });
+
+    setTimeout(() => container.classList.add("visible"), 50);
   }
 
-  // Hook into the form submit
-  document.getElementById("ironLunchForm").addEventListener("submit", function(event) {
-    event.preventDefault();
-    submitToSheetDB();
-  });
+  function checkCompletion() {
+    const checkboxes = document.querySelectorAll(
+      '#checkbox-container input[type="checkbox"]'
+    );
+    const finishButton = document.getElementById("finish-btn");
+
+    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+    finishButton.disabled = !allChecked;
+  }
 </script>
 </html>
