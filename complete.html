@@ -2,221 +2,150 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Iron Lunch Completion</title>
+  <title>Sequence Tester</title>
+
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 2rem;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #f8f8f8;
+    #checkbox-container label {
+      display: block;
+      margin: 6px 0;
     }
-
-    form {
-      max-width: 400px;
-      width: 100%;
-      background: white;
-      padding: 2rem;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      text-align: center;
-    }
-
-    input[type="text"] {
-      padding: 0.5rem;
-      width: 80%;
-      margin-bottom: 1rem;
-      font-size: 1rem;
-    }
-
-    button {
-      padding: 0.5rem 1rem;
-      margin-top: 1rem;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-
-    button:disabled {
-      background-color: #ccc;
-      cursor: not-allowed;
-    }
-
     #checkbox-container {
+      margin-top: 12px;
       opacity: 0;
-      transition: opacity 1.8s ease-in-out;
-      margin-top: 1rem;
+      transition: opacity 0.3s ease;
     }
-
     #checkbox-container.visible {
       opacity: 1;
-    }
-
-    label {
-      display: inline-block;
-      text-align: left;
-      width: 100%;
-      margin-bottom: 0.5rem;
-      transition: all 0.6s ease;
-    }
-
-    input[type="checkbox"] {
-      margin-right: 0.5rem;
-    }
-
-    input[type="checkbox"]:checked + span {
-      text-decoration: line-through;
-      opacity: 0.6;
-      transition: all 0.6s ease;
     }
   </style>
 </head>
 <body>
 
-  <!-- ✅ Updated form tag: prevent default + redirect -->
-  <form id="ironLunchForm" onsubmit="event.preventDefault(); window.location.href='thankyou.html';">
-    <h1>Complete Your Iron Lunch</h1>
+  <!-- INPUT + GO BUTTON -->
+  <input
+    id="customer-number"
+    type="number"
+    placeholder="Enter sequence number"
+  />
+  <button type="button" id="go-btn">Go</button>
 
-    <label for="customer-number">Type Your Customer Number:</label><br>
-    <input type="text" id="customer-number" name="customer-number" placeholder="e.g. 3">
-    <button type="button" onclick="loadSequence()">Go</button><br>
+  <!-- CHECKBOXES -->
+  <div id="checkbox-container"></div>
 
-    <div id="checkbox-container"></div>
+  <!-- FINISH BUTTON -->
+  <button id="finish-btn" disabled>Finish</button>
 
-    <button type="submit" id="finish-btn" disabled>Finish</button>
-  </form>
-
+  <!-- JAVASCRIPT -->
   <script>
-/* =========================
-     ACTION DEFINITIONS
-     ========================= */
+    const actionSets = {
+      MindfulnessMaster: [
+        "Meditate for 2 minutes",
+        "Write down three things you’re grateful for",
+        "Organize your to-do list"
+      ],
+      RefreshedRecharged: [
+        "Drink a glass of water",
+        "Stretch your neck and shoulders",
+        "Take a walk for 3–5 minutes"
+      ],
+      StrongSteady: [
+        "Do 20 calf raises",
+        "Perform 10–15 squats",
+        "Take deep breaths (4–4–6 method)"
+      ],
+      EnergyBoost: [
+        "Eat a piece of fresh fruit",
+        "Walk around for 3–5 minutes",
+        "Listen to a favorite song"
+      ],
+      AgilityExpert: [
+        "Do 10 desk push-ups",
+        "Roll your ankles and wrists",
+        "Gently massage the area around your eyes"
+      ],
+      PosturePro: [
+        "Do a posture check and adjust your sitting position",
+        "Perform 20 shoulder rolls",
+        "Stretch your back and chest for 30 seconds"
+      ],
+      MentalReset: [
+        "Step outside for fresh air",
+        "Identify one priority task",
+        "Jot down a quick journal entry"
+      ],
+      Productivity: [
+        "Organize your to-do list",
+        "Clear off your desk",
+        "Send a quick note of appreciation to a friend or coworker"
+      ]
+    };
 
-  const actionSets = {
-    MindfulnessMaster: [
-      "Meditate for 2 minutes",
-      "Write down three things you’re grateful for",
-      "Organize your to-do list"
-    ],
-    RefreshedRecharged: [
-      "Drink a glass of water",
-      "Stretch your neck and shoulders",
-      "Take a walk for 3–5 minutes"
-    ],
-    StrongSteady: [
-      "Do 20 calf raises",
-      "Perform 10–15 squats",
-      "Take deep breaths (4–4–6 method)"
-    ],
-    EnergyBoost: [
-      "Eat a piece of fresh fruit",
-      "Walk around for 3–5 minutes",
-      "Listen to a favorite song"
-    ],
-    AgilityExpert: [
-      "Do 10 desk push-ups",
-      "Roll your ankles and wrists",
-      "Gently massage the area around your eyes"
-    ],
-    PosturePro: [
-      "Do a posture check and adjust your sitting position",
-      "Perform 20 shoulder rolls",
-      "Stretch your back and chest for 30 seconds"
-    ],
-    MentalReset: [
-      "Step outside for fresh air",
-      "Identify one priority task",
-      "Jot down a quick journal entry"
-    ],
-    Productivity: [
-      "Organize your to-do list",
-      "Clear off your desk",
-      "Send a quick note of appreciation to a friend or coworker"
-    ]
-  };
+    const sequenceToName = {
+      1: "MindfulnessMaster",
+      78: "MindfulnessMaster",
+      2: "RefreshedRecharged",
+      3: "StrongSteady",
+      4: "EnergyBoost",
+      5: "AgilityExpert",
+      6: "PosturePro",
+      7: "MentalReset",
+      8: "Productivity"
+    };
 
-  /* =========================
-     SEQUENCE → NAME MAPPING
-     ========================= */
-
-  const sequenceToName = {
-    1: "MindfulnessMaster",
-    78: "MindfulnessMaster",
-    2: "RefreshedRecharged",
-    3: "StrongSteady",
-    4: "EnergyBoost",
-    5: "AgilityExpert",
-    6: "PosturePro",
-    7: "MentalReset",
-    8: "Productivity"
-  };
-
-  /* =========================
-     HELPERS
-     ========================= */
-
-  function getSequenceName(sequenceNumber) {
-    return sequenceToName[sequenceNumber] || null;
-  }
-
-  function getSequenceActions(sequenceNumber) {
-    const name = getSequenceName(sequenceNumber);
-    return name ? actionSets[name] : [];
-  }
-
-  /* =========================
-     MAIN LOGIC
-     ========================= */
-
-  function loadSequence() {
-    const input = document.getElementById("customer-number").value.trim();
-    const customerNumber = Number(input);
-
-    const container = document.getElementById("checkbox-container");
-    const finishButton = document.getElementById("finish-btn");
-
-    // Reset UI
-    container.classList.remove("visible");
-    container.innerHTML = "";
-    finishButton.disabled = true;
-
-    const steps = getSequenceActions(customerNumber);
-
-    if (steps.length === 0) {
-      container.textContent =
-        "No sequence found for that customer number. Please enter a valid number.";
-      return;
+    function getSequenceActions(sequenceNumber) {
+      const name = sequenceToName[sequenceNumber];
+      return name ? actionSets[name] : [];
     }
 
-    steps.forEach((step, index) => {
-      const label = document.createElement("label");
+    function loadSequence() {
+      const num = Number(
+        document.getElementById("customer-number").value
+      );
 
-      const checkbox = document.createElement("input");
-      checkbox.type = "checkbox";
-      checkbox.name = `step${index + 1}`;
-      checkbox.addEventListener("change", checkCompletion);
+      const container = document.getElementById("checkbox-container");
+      const finishBtn = document.getElementById("finish-btn");
 
-      const span = document.createElement("span");
-      span.textContent = step;
+      container.innerHTML = "";
+      container.classList.remove("visible");
+      finishBtn.disabled = true;
 
-      label.appendChild(checkbox);
-      label.appendChild(span);
-      container.appendChild(label);
-    });
+      const steps = getSequenceActions(num);
 
-    setTimeout(() => container.classList.add("visible"), 50);
-  }
+      if (!steps.length) {
+        container.textContent = "No sequence found.";
+        container.classList.add("visible");
+        return;
+      }
 
-  function checkCompletion() {
-    const checkboxes = document.querySelectorAll(
-      '#checkbox-container input[type="checkbox"]'
-    );
-    const finishButton = document.getElementById("finish-btn");
+      steps.forEach((step) => {
+        const label = document.createElement("label");
 
-    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-    finishButton.disabled = !allChecked;
-  }
-</script>
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.addEventListener("change", checkCompletion);
+
+        label.appendChild(cb);
+        label.appendChild(document.createTextNode(" " + step));
+        container.appendChild(label);
+      });
+
+      container.classList.add("visible");
+    }
+
+    function checkCompletion() {
+      const boxes = document.querySelectorAll(
+        "#checkbox-container input[type='checkbox']"
+      );
+      document.getElementById("finish-btn").disabled =
+        !Array.from(boxes).every(b => b.checked);
+    }
+
+    // 🔗 CONNECT GO BUTTON TO JAVASCRIPT
+    document
+      .getElementById("go-btn")
+      .addEventListener("click", loadSequence);
+  </script>
+
+</body>
 </html>
+
